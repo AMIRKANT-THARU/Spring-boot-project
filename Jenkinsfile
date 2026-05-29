@@ -1,7 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        SONARQUBE = 'sonarqube'
+    }
+
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -10,13 +15,21 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo 'Building project...'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running tests...'
+                sh 'mvn test'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh 'mvn sonar:sonar'
+                }
             }
         }
     }
